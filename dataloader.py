@@ -1,4 +1,4 @@
-"""this only exists in devop_stage branch.                                                                                                 
+"""                                                                                                 
   This module is to load all those 'no' and 'yes' image files of brain tumour , as per the regular   
   convenient manner of image classification use case. We will be making our labels according to the  
   yes/no filenames from the directory.                                                               
@@ -56,7 +56,21 @@ def create_data_loader(dirlis,labellist,image_dtlst,image_pathlst):
     print(len(labellist),":-sample label to show where actually it comes from",labels)
     print(len(image_pathlst),":-sample path to show where actually it comes from",image_path)
     print(len(image_dtlst))
- 
+
+"""
+Before giving the preprocessed data  to our ML-Model we need to reshuffle our series patterned data ,
+otherwise model will learn a specific pattern from the dataset and carry on the similar behavior to the test dataset also.
+"""
+def shuffle_data(labelset,img_dataset,pathset):                                                     
+    shuf_idx = [i for i in range(0,len(labelset))]    ##lst = [i for i in range(0,len(trainlbl))]                                                               
+    labelset = np.array(labelset)                     ## random.shuffle(lst)
+    img_dataset = np.array(img_dataset)               ## sett = trainlbl[lst]                                        
+    pathset = np.array(pathset)                       ##  settpath = trainpath[lst]                                                                                     
+    random.shuffle(shuf_idx)                          ##
+    labelset = labelset[shuf_idx]
+    img_dataset = img_dataset[shuf_idx]                                                         
+    pathset = pathset[shuf_idx] 
+    return labelset,img_dataset,pathset
 
 
 if __name__ == "__main__":
@@ -86,3 +100,13 @@ if __name__ == "__main__":
     print(label_test[2])
     print(images_test[2])
     print(image_paths_test[2])
+    
+    """Creating shuffle trained dataset"""
+    label_train,images_train,image_paths_train = shuffle_data(label_train,images_train,image_paths_train)
+    print(label_train[0:8])
+    print(image_paths_train[0:8])
+    """Creating shuffle test dataset"""
+    label_test,images_test,image_paths_test = shuffle_data(label_test,images_test,image_paths_test)
+    print(label_test[1:12])
+    print(image_paths_test[2:7])
+
