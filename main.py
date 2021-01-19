@@ -8,6 +8,75 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import matplotlib.pyplot as plt
+"""Parameters and user defined configs for model"""
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = CNN().to(device)
+print(model.parameters)
+#parameters(user defined)
+in_channels = 3
+num_classes = 2
+learning_rate = 0.001
+BATCH_SIZE = 66
+EPOCHS = 20
+momentum = 0.9
+# Loss and Loss_function criterion
+loss_function = nn.CrossEntropyLoss()   #As we are using cross entropy loss we dont have to use Softmax at the end
+optimizer = optim.SGD(model.parameters(),lr=learning_rate,momentum=momentum)
+"""Actual Training"""
+def train(model_net,train_data,label_train,loss_lst):
+
+    for epoch in range(EPOCHS):# here as we have already seperated Features and labels ,we have to
+        for i in range(0,len(train_data),BATCH_SIZE):# Initiate a for loop which steps or iter train data by the steps of
+            #print(i,i+BATCH_SIZE)             #our user Defined BATCH_SIZE ,else if data is coming as a single unit,
+                                                #Then we can use inbuilt torch "Dataloader" and enumerate data and labels using a single for loop
+            X_train_batch = train_data[i : i+BATCH_SIZE].to(device=device) #converting data into "CUDA" or device standards
+            y_train_batch = label_train[i : i+BATCH_SIZE].to(device=device)
+            #Forward pass
+            y_pred_outs = model_net(X_train_batch.float())  #should be converted to float otherwise it will throw a RUNTIME error of expecting DOUBLE
+            loss = loss_function(y_pred_outs,y_train_batch.long())
+            loss_lst.append(loss)
+            if epoch % 2 ==1:
+                print("Epoch number:{} and loss:{}".format(epoch,loss.item()))
+            #backward propagation
+            optimizer.zero_grad()   #zero setting all the accumulated gradients
+            loss.backward()
+            optimizer.step()
+"""checking accuracy"""
+def check_accuracy(data,label,model_net):
+    # if data.X_train:
+    #  print("checking accuracy on training data...")
+    #  else :
+    #  print("checking accuracy on testing data...")
+   
+    num_correct = 0
+    num_samples = 0
+    model_net.eval()
+    with torch.no_grad():
+        for i,datas in enumerate(data):
+            datas = datas.unsqueeze(1)
+            datas = datas.float()
+            datas = datas.permute(1,0,2,3)
+            
+            
+            x = datas.to(device=device)
+            model_out = model_net(x)
+            predicted_y = torch.argmax(model_out)
+            predicted_y = predicted_y.item()
+            #print(predicted_y)
+            real_y = label[i].to(device=device)
+            #real_y = label[i]
+            real_y = real_y.item()
+            
+            if predicted_y == real_y:
+                num_correct += 1
+            num_samples +=1
+
+            accuracy = (num_correct/num_samples) * 100
+            #print("accuracy : {}".format(accuracy))
+
+        print(f"Got {num_correct}/{num_samples} with accuracy {float(num_correct)/float(num_samples)*100:.2f}")
+    model_net.train()
+
 
 if __name__ == "__main__":
     path = "/media/anand/polyglot/BraindataPY"
@@ -53,20 +122,8 @@ if __name__ == "__main__":
 
 
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = CNN().to(device)
-    print(model.parameters)
-    #parameters(user defined)
-    in_channels = 3
-    num_classes = 2
-    learning_rate = 0.001
-    BATCH_SIZE = 66
-    EPOCHS = 60
-    momentum = 0.9
-    # Loss and Loss_function criterion
-    loss_function = nn.CrossEntropyLoss()   #As we are using cross entropy loss we dont have to use Softmax at the end
-    optimizer = optim.SGD(model.parameters(),lr=learning_rate,momentum=momentum)
     # For that we need to convert our train and test set data labels to torch tensors
+
     X_train = torch.tensor(X_train)
     X_train = X_train.permute(0,3,2,1)  ## VERY ESSENTIAL AS TORCH EXPECTS INPUT TO BE IN THE CHANNEL FIRST MANNER AS LIKE
     y_train = torch.tensor(y_train)             ## LIBTORCH
@@ -75,70 +132,12 @@ if __name__ == "__main__":
     y_test = torch.tensor(y_test)
     #ACTUAL TRAINING
     final_losses = []
-    def train(model_net):
-        
-        for epoch in range(EPOCHS):# here as we have already seperated Features and labels ,we have to
-            for i in range(0,len(X_train),BATCH_SIZE):# Initiate a for loop which steps or iter train data by the steps of
-                #print(i,i+BATCH_SIZE)             #our user Defined BATCH_SIZE ,else if data is coming as a single unit,
-                                                    #Then we can use inbuilt torch "Dataloader" and enumerate data and labels using a single for loop
-                X_train_batch = X_train[i : i+BATCH_SIZE].to(device=device) #converting data into "CUDA" or device standards
-                y_train_batch = y_train[i : i+BATCH_SIZE].to(device=device)
-                #Forward pass
-                y_pred_outs = model(X_train_batch.float())  #should be converted to float otherwise it will throw a RUNTIME error of expecting DOUBLE
-                loss = loss_function(y_pred_outs,y_train_batch.long())
-                final_losses.append(loss)
-                if epoch % 2 ==1:
-                    print("Epoch number:{} and loss:{}".format(epoch,loss.item()))
-                #backward propagation
-                optimizer.zero_grad()   #zero setting all the accumulated gradients
-                loss.backward()
-                optimizer.step()
-    train(model)
+    train(model,X_train,y_train,final_losses)
     #plotting the loss value as 60 epochs runs for 3 batches it will be eventually 180 
-    plt.plot(range(180),final_losses)
+    plt.plot(range(60),final_losses)
     plt.xlabel('Loss')
     plt.ylabel("Epochs")
     plt.show()
     #checking accuracy
-    def check_accuracy(data,label,model):
-#     if data.X_train:
-#         print("checking accuracy on training data...")
-#     else :
-#         print("checking accuracy on testing data...")
-        
-        num_correct = 0
-        num_samples = 0
-        model.eval()
-        with torch.no_grad():
-            for i,datas in enumerate(data):
-                datas = datas.unsqueeze(1)
-                datas = datas.float()
-                datas = datas.permute(1,0,2,3)
-                
-                
-                x = datas.to(device=device)
-                model_out = model(x)
-                predicted_y = torch.argmax(model_out)
-                predicted_y = predicted_y.item()
-                #print(predicted_y)
-                real_y = label[i].to(device=device)
-                #real_y = label[i]
-                real_y = real_y.item()
-               
-                if predicted_y == real_y:
-                    num_correct += 1
-                num_samples += 1
-                
-                accuracy = (num_correct/num_samples) * 100
-                
-                
-            #print("accuracy : {}".format(accuracy))
-            print(f"Got {num_correct}/{num_samples} with accuracy {float(num_correct)/float(num_samples)*100:.2f}")
- 
-            
-        model.train()
-
-
-    
     check_accuracy(X_test,y_test,model)
     
