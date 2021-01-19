@@ -35,7 +35,9 @@ def fin_preprocess(images,train_feature_lst,labels):
         image = cv2.resize(image,(224,224),interpolation=cv2.INTER_CUBIC)
         image = image/255 #Normalizing images
         train_feature_lst.append(image)
-    return np.array(train_feature_lst),np.array(labels)
+        feature_arr = np.array(train_feature_lst)
+        label_arr = np.array(labels)
+    return feature_arr, label_arr
 
 if __name__ == "__main__":
     path = "/media/anand/polyglot/BraindataPY"

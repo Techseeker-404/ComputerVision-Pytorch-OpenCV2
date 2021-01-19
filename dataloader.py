@@ -11,7 +11,6 @@ import warnings
 import random
 warnings.filterwarnings("ignore")
 
-
 """                                                                                                 
  Image file paths for this system.                                                                  
 """ 

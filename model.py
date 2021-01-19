@@ -4,6 +4,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torchvision.transforms as transform
+import warnings
+warnings.filterwarnings("ignore")
 class CNN(nn.Module):
     def __init__(self,in_channels=3,num_classes=2):
         super(CNN,self).__init__()
@@ -47,10 +49,14 @@ class CNN(nn.Module):
         x = self.fc1(x)
 
         return x
-
-model = CNN()
-x = torch.randn(128,3,224,224)
-print(x.shape)
-print(model(x).shape)
-
+""" testing the model"""
+#model = CNN()
+#x = torch.randn(64,3,224,224)
+#print(x.shape)
+#print(model(x).shape)
+"""set device"""
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+"""Initializing the network"""
+model = CNN().to(device)
+print(model.parameters)
 
