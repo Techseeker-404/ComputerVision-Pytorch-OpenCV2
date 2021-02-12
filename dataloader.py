@@ -66,7 +66,7 @@ otherwise model will learn a specific pattern from the dataset and carry on the 
 def shuffle_data(labelset,img_dataset,pathset):                                                     
     shuf_idx = [i for i in range(0,len(labelset))]    ##lst = [i for i in range(0,len(trainlbl))]                                                               
     labelset = np.array(labelset)                     ## random.shuffle(lst)
-    img_dataset = np.array(img_dataset)               ## sett = trainlbl[lst]                                        
+    img_dataset = np.array(img_dataset,dtype="object")               ## sett = trainlbl[lst]                                        
     pathset = np.array(pathset)                       ##  settpath = trainpath[lst]                                                                                     
     random.shuffle(shuf_idx)                          ##
     labelset = labelset[shuf_idx]
