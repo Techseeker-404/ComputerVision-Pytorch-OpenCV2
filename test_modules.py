@@ -2,6 +2,9 @@ import unittest
 import pytest
 from dataloader import create_data_loader,shuffle_data,train_or_testset
 from preprocessing import fin_preprocess,preprocess
+import torch
+import model 
+from model import CNN
 import warnings
 import numpy as np
 warnings.filterwarnings("ignore")
@@ -17,7 +20,7 @@ image_paths_train = [] ###This is an optional step to keep a track on the train 
 label_test = []      ###declare a list for tracking target labels for testing datas
 images_test = []      ####assigning a list and storing image arrays of testing images
 image_paths_test = [] ###This is an optional step to keep a track on the test image datas path
-
+model = CNN()
 
 X = [] #Final image feature map
 
@@ -46,6 +49,10 @@ class TestBraindata(unittest.TestCase):
         X_train,y_train = fin_preprocess(image_paths_train,X,label_train)
 
         assert X_train.shape == (196, 224, 224, 3)
+    def test_pytorch_model(self):
+        x = torch.randn(64,3,224,224)
+        assert model(x).shape == torch.Size([64,2])
+
         
 
 if __name__ == "__main__":
